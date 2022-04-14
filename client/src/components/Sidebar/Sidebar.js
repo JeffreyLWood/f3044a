@@ -36,11 +36,11 @@ const Sidebar = ({
         .filter((conversation) =>
           conversation.otherUser.username.includes(searchTerm)
         )
-        .map((conversation) => {
+        .map((conversation, idx) => {
           return (
             <Chat
               conversation={conversation}
-              key={conversation.otherUser.username}
+              key={idx}
               setActiveChat={setActiveChat}
             />
           );

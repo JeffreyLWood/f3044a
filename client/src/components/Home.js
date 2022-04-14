@@ -51,6 +51,7 @@ const Home = ({ user, logout }) => {
 
   const saveMessage = async (body) => {
     const { data } = await axios.post('/api/messages', body);
+    console.log(body);
     return data;
   };
 
@@ -61,17 +62,17 @@ const Home = ({ user, logout }) => {
       sender: data.sender,
     });
   };
-
-  const postMessage = (body) => {
+  //Made into asynchronous function
+  const postMessage = async (body) => {
     try {
-      const data = saveMessage(body);
-
-      if (!body.conversationId) {
+      console.log(body);
+      const data = await saveMessage(body);
+      if (!body.conversationID) {
+        //ID not Id
         addNewConvo(body.recipientId, data.message);
       } else {
         addMessageToConversation(data);
       }
-
       sendMessage(data, body);
     } catch (error) {
       console.error(error);
@@ -97,6 +98,7 @@ const Home = ({ user, logout }) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
       const { message, sender = null } = data;
       if (sender !== null) {
+        console.log(message);
         const newConvo = {
           id: message.conversationId,
           otherUser: sender,
@@ -104,15 +106,18 @@ const Home = ({ user, logout }) => {
         };
         newConvo.latestMessageText = message.text;
         setConversations((prev) => [newConvo, ...prev]);
+      } else {
+        //Instead of conversations.forEach.. It should make a new variable with all the convos and the new messages to
+        //the right convo, and then setConversations to that new variable, here called updatedConversation.
+        let updatedConversation = conversations.map((convo) => {
+          if (convo.id === message.conversationId) {
+            convo.messages.push(message);
+            convo.latestMessageText = message.text;
+          }
+          return convo;
+        });
+        setConversations(updatedConversation);
       }
-
-      conversations.forEach((convo) => {
-        if (convo.id === message.conversationId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-        }
-      });
-      setConversations(conversations);
     },
     [setConversations, conversations]
   );
