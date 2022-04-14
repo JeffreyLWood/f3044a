@@ -32,6 +32,8 @@ const Sidebar = ({
       <CurrentUser user={user} />
       <Typography className={classes.title}>Chats</Typography>
       <Search handleChange={handleChange} />
+      {/* Set key to idx. It was set to a non unique variable previously.
+      Still encountering issues rendering multiple Chats with same user. */}
       {conversations
         .filter((conversation) =>
           conversation.otherUser.username.includes(searchTerm)

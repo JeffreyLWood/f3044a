@@ -51,7 +51,6 @@ const Home = ({ user, logout }) => {
 
   const saveMessage = async (body) => {
     const { data } = await axios.post('/api/messages', body);
-    console.log(body);
     return data;
   };
 
@@ -62,49 +61,56 @@ const Home = ({ user, logout }) => {
       sender: data.sender,
     });
   };
-  //Made into asynchronous function
+  //Made into asynchronous function and commented out the if else case. Both cases
+  //go to addMessageToConversation and in that function the case of adding messages
+  //to an existing conversation or constructing a new conversation is made.
   const postMessage = async (body) => {
     try {
-      console.log(body);
       const data = await saveMessage(body);
-      if (!body.conversationID) {
-        //ID not Id
-        addNewConvo(body.recipientId, data.message);
-      } else {
-        addMessageToConversation(data);
-      }
+      // if (!body.conversationId) {
+      //ID not Id changed at input
+      // addNewConvo(body.recipientId, data.message);
+      addMessageToConversation(data);
+      // } else {
+      //   addMessageToConversation(data);
+      // }
       sendMessage(data, body);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const addNewConvo = useCallback(
-    (recipientId, message) => {
-      conversations.forEach((convo) => {
-        if (convo.otherUser.id === recipientId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-          convo.id = message.conversationId;
-        }
-      });
-      setConversations(conversations);
-    },
-    [setConversations, conversations]
-  );
+  //The main source of the problem for messages not being shown in new chats
+  //is that AddNewConvo was not doing anything. Functionality for building a new
+  //Convo and adding it to Conversations was partially in place in AddMessageToConversation
+  //but for whatever reason was incomplete. I have left addNewConvo here pending a code review
+  //to determine its use:
+
+  // const addNewConvo = useCallback(
+  //   (recipientId, message) => {
+  //     conversations.forEach((convo) => {
+  //       if (convo.otherUser.id === recipientId) {
+  //         convo.messages.push(message);
+  //         convo.latestMessageText = message.text;
+  //         convo.id = message.conversationId;
+  //       }
+  //     });
+  //     setConversations(conversations);
+  //   },
+  //   [setConversations, conversations]
+  // );
 
   const addMessageToConversation = useCallback(
     (data) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
-      const { message, sender = null } = data;
+      const { message, sender = null, otherUser } = data;
       if (sender !== null) {
-        console.log(message);
         const newConvo = {
           id: message.conversationId,
-          otherUser: sender,
+          otherUser: otherUser,
           messages: [message],
+          latestMessageText: message.text,
         };
-        newConvo.latestMessageText = message.text;
         setConversations((prev) => [newConvo, ...prev]);
       } else {
         //Instead of conversations.forEach.. It should make a new variable with all the convos and the new messages to
