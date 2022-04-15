@@ -6,7 +6,7 @@ import moment from 'moment';
 const Messages = (props) => {
   const { messages, otherUser, userId } = props;
   return (
-    //Ordered by ID - Should be createdAt ?
+    //Order messages by id using sort so newest will be at the bottom of chat.
     <Box>
       {messages
         .sort((a, b) => a.id - b.id)

@@ -61,19 +61,14 @@ const Home = ({ user, logout }) => {
       sender: data.sender,
     });
   };
-  //Made into asynchronous function and commented out the if else case. Both cases
+
+  //Made into asynchronous function and removed if/else cases. Both cases
   //go to addMessageToConversation and in that function the case of adding messages
   //to an existing conversation or constructing a new conversation is made.
   const postMessage = async (body) => {
     try {
       const data = await saveMessage(body);
-      // if (!body.conversationId) {
-      //ID not Id changed at input
-      // addNewConvo(body.recipientId, data.message);
       addMessageToConversation(data);
-      // } else {
-      //   addMessageToConversation(data);
-      // }
       sendMessage(data, body);
     } catch (error) {
       console.error(error);
@@ -81,24 +76,9 @@ const Home = ({ user, logout }) => {
   };
 
   //The main source of the problem for messages not being shown in new chats
-  //is that AddNewConvo was not doing anything. Functionality for building a new
-  //Convo and adding it to Conversations was partially in place in AddMessageToConversation
-  //but for whatever reason was incomplete. I have left addNewConvo here pending a code review
-  //to determine its use:
-
-  // const addNewConvo = useCallback(
-  //   (recipientId, message) => {
-  //     conversations.forEach((convo) => {
-  //       if (convo.otherUser.id === recipientId) {
-  //         convo.messages.push(message);
-  //         convo.latestMessageText = message.text;
-  //         convo.id = message.conversationId;
-  //       }
-  //     });
-  //     setConversations(conversations);
-  //   },
-  //   [setConversations, conversations]
-  // );
+  //is that AddNewConvo was not achieving its intended goal. Functionality for building a new
+  //conversation object and adding it to 'conversations' was partially in place in AddMessageToConversation
+  //but for whatever reason was incomplete.
 
   const addMessageToConversation = useCallback(
     (data) => {
@@ -113,8 +93,9 @@ const Home = ({ user, logout }) => {
         };
         setConversations((prev) => [newConvo, ...prev]);
       } else {
-        //Instead of conversations.forEach.. It should make a new variable with all the convos and the new messages to
-        //the right convo, and then setConversations to that new variable, here called updatedConversation.
+        //Previously an attempt was made to edit conversations directly and then set it to itself.
+        //Now a new variable, updatedConversation is made. It has all of the conversation objects and
+        //addes new messages to the correct conversation. We then setConversations to that new variable.
         let updatedConversation = conversations.map((convo) => {
           if (convo.id === message.conversationId) {
             convo.messages.push(message);
