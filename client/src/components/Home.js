@@ -62,40 +62,35 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  //Made into asynchronous function and removed if/else cases. Both cases
-  //go to addMessageToConversation and in that function the case of adding messages
-  //to an existing conversation or constructing a new conversation is made.
   const postMessage = async (body) => {
     try {
       const data = await saveMessage(body);
-      addMessageToConversation(data);
+      addMessageToConversation(data, body.recipientId);
       sendMessage(data, body);
     } catch (error) {
       console.error(error);
     }
   };
 
-  //The main source of the problem for messages not being shown in new chats
-  //is that AddNewConvo was not achieving its intended goal. Functionality for building a new
-  //conversation object and adding it to 'conversations' was partially in place in AddMessageToConversation
-  //but for whatever reason was incomplete.
-
   const addMessageToConversation = useCallback(
-    (data) => {
+    (data, recipientId = null) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
-      const { message, sender = null, otherUser } = data;
+      const { message, sender = null} = data;
+
       if (sender !== null) {
-        const newConvo = {
-          id: message.conversationId,
-          otherUser: otherUser,
-          messages: [message],
-          latestMessageText: message.text,
-        };
-        setConversations((prev) => [newConvo, ...prev]);
+        
+       let newConversation = conversations.map((conversation)=>{
+          if(conversation.otherUser.id === recipientId){ 
+            conversation = {...conversation,
+              id: message.conversationId,
+              messages: [message],
+              latestMessageText: message.text}
+          }
+          return conversation
+        })
+
+        setConversations(newConversation);
       } else {
-        //Previously an attempt was made to edit conversations directly and then set it to itself.
-        //Now a new variable, updatedConversation is made. It has all of the conversation objects and
-        //addes new messages to the correct conversation. We then setConversations to that new variable.
         let updatedConversation = conversations.map((convo) => {
           if (convo.id === message.conversationId) {
             convo.messages.push(message);

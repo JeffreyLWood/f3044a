@@ -63,8 +63,8 @@ describe('Bug Fix: Sending Messages', () => {
     cy.get('input[name=text]').type('Fifth message{enter}');
     cy.get('input[name=text]').type('Sixth message{enter}');
 
-    cy.contains('Fourth message');
-    cy.contains('Fifth message');
-    cy.contains('Sixth message');
+    cy.contains("Fourth message");
+    cy.contains("Fifth message");
+    cy.contains("Sixth message");
   });
 });
