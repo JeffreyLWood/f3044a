@@ -29,7 +29,6 @@ router.post("/", async (req, res, next) => {
         user2Id: recipientId,
       });
       if (onlineUsers.includes(senderId)) {
-        //senderId not sender.id
         sender.online = true;
       }
     }
@@ -40,10 +39,6 @@ router.post("/", async (req, res, next) => {
       conversationId: conversation.id,
     });
 
-    //On the front end, if it is a new conversation, we need to construct a new
-    //conversation object and add it to 'conversations'.
-    //This conversation object requires an otherUser object value. We will make that here,
-    //based on the recipientId, and send it with the response.
     let otherUser = await User.findOne({ where: { id: recipientId } });
 
     res.json({ message, sender, otherUser });
