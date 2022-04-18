@@ -73,8 +73,10 @@ const Home = ({ user, logout }) => {
   };
 
   const setToSeen = async (conversationId, userId) => {
+    if(!conversationId){
+      return;
+    }
 try {
-  console.log(conversationId, userId)
  await axios.put("/api/conversations", {conversationId, userId})
 } catch (error) {
   console.log(error)

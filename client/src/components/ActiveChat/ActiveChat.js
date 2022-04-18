@@ -52,6 +52,7 @@ conversation && setToSeen(conversation.id, user.id)
             {user && (
               <>
                 <Messages
+               
                   messages={conversation.messages}
                   otherUser={conversation.otherUser}
                   userId={user.id}
