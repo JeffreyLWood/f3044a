@@ -78,4 +78,24 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+//For setting messages in conversation to seen.
+router.put("/", async (req, res, next) => {
+  try {
+    await Message.update(
+      { seen: true },
+      {
+        where: {
+          conversationId: req.body.conversationId,
+          senderId: {
+            [Op.not]: req.body.userId,
+          },
+        },
+      }
+    );
+    res.status(200);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
