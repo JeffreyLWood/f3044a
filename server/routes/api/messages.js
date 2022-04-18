@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { Conversation, Message, User } = require("../../db/models");
+const { Conversation, Message} = require("../../db/models");
 const onlineUsers = require("../../onlineUsers");
 
 // expects {recipientId, text, conversationId } in body (conversationId will be null if no conversation exists yet)
@@ -29,7 +29,6 @@ router.post("/", async (req, res, next) => {
         user2Id: recipientId,
       });
       if (onlineUsers.includes(senderId)) {
-        //senderId not sender.id
         sender.online = true;
       }
     }
@@ -40,13 +39,7 @@ router.post("/", async (req, res, next) => {
       conversationId: conversation.id,
     });
 
-    //On the front end, if it is a new conversation, we need to construct a new
-    //conversation object and add it to 'conversations'.
-    //This conversation object requires an otherUser object value. We will make that here,
-    //based on the recipientId, and send it with the response.
-    let otherUser = await User.findOne({ where: { id: recipientId } });
-
-    res.json({ message, sender, otherUser });
+    res.json({ message, sender});
   } catch (error) {
     next(error);
   }

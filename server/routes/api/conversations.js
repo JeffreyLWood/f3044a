@@ -19,9 +19,9 @@ router.get("/", async (req, res, next) => {
         },
       },
       attributes: ["id"],
-      order: [[Message, "createdAt", "DESC"]],
+      order: [[Message, "createdAt", "ASC"]],
       include: [
-        { model: Message, order: ["createdAt", "DESC"] },
+        { model: Message, order: ["createdAt", "ASC"] },
         {
           model: User,
           as: "user1",
@@ -78,7 +78,6 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-//For setting messages in conversation to seen.
 router.put("/", async (req, res, next) => {
   try {
     await Message.update(
