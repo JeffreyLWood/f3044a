@@ -72,15 +72,19 @@ const Home = ({ user, logout }) => {
     }
   };
 
+  const sendReadReceipt = (body) => {
+    socket.emit('send-read-receipt', {
+      conversationId: body.recipientId,
+      userId: body.userId,
+    });
+  };
+
   const setToSeen = async (conversationId, userId) => {
     if(!conversationId){
       return;
     }
-try {
- await axios.put("/api/conversations", {conversationId, userId})
-} catch (error) {
-  console.log(error)
-}
+  await axios.put("/api/conversations", {conversationId, userId})
+  sendReadReceipt({conversationId, userId})
   }
 
   const addMessageToConversation = useCallback(
@@ -154,7 +158,7 @@ try {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-
+    socket.on('send-read-receipt', sendReadReceipt);
     return () => {
       // before the component is destroyed
       // unbind all event handlers used in this component
