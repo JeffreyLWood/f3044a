@@ -76,21 +76,6 @@ const Home = ({ user, logout }) => {
     }
   };
 
-  const sendReadReceipt = (body) => {
-    socket.emit('send-read-receipt', {
-      conversationId: body.recipientId,
-      userId: body.userId,
-    });
-  };
-
-  const setToSeen = async (conversationId, userId) => {
-    if (!conversationId) {
-      return;
-    }
-    await axios.put('/api/conversations', { conversationId, userId });
-    sendReadReceipt({ conversationId, userId });
-  };
-
   const addNewConvo = useCallback(
     (recipientId, message) => {
       let newConversation = conversations.map((conversation) => {
@@ -143,6 +128,25 @@ const Home = ({ user, logout }) => {
     [setConversations, conversations]
   );
 
+  const sendReadReceipt = (body) => {
+    socket.emit('send-read-receipt', {
+      conversationId: body.recipientId,
+      userId: body.userId,
+    });
+  };
+
+  const setToSeen = async (conversationId, userId) => {
+    if (!conversationId) {
+      return;
+    }
+    try {
+      await axios.put('/api/conversations', { conversationId, userId });
+      sendReadReceipt({ conversationId, userId });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const setActiveChat = (username) => {
     setActiveConversation(username);
   };
@@ -189,6 +193,7 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('send-read-receipt', sendReadReceipt);
     };
   }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
 
