@@ -93,7 +93,6 @@ const Home = ({ user, logout }) => {
       const { message, sender = null} = data;
 
       if (sender !== null) {
-        
        let newConversation = conversations.map((conversation)=>{
           if(conversation.otherUser.id === recipientId){ 
             conversation = {...conversation,
@@ -103,17 +102,18 @@ const Home = ({ user, logout }) => {
           }
           return conversation
         })
-
         setConversations(newConversation);
       } else {
-        let updatedConversation = conversations.map((convo) => {
+        setConversations(prev => prev.map((convo) => {
           if (convo.id === message.conversationId) {
-            convo.messages.push(message);
-            convo.latestMessageText = message.text;
+            const convoCopy = { ...convo }
+            convoCopy.messages = [...convoCopy.messages, message];
+            convoCopy.latestMessageText = message.text;
+            return convoCopy;
+          } else {
+            return convo;
           }
-          return convo;
-        });
-        setConversations(updatedConversation);
+      }))
       }
     },
     [setConversations, conversations]
