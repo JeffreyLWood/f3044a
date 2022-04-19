@@ -65,7 +65,11 @@ const Home = ({ user, logout }) => {
   const postMessage = async (body) => {
     try {
       const data = await saveMessage(body);
-      addMessageToConversation(data, body.recipientId);
+      if (!body.conversationId) {
+        addNewConvo(body.recipientId, data.message);
+      } else {
+        addMessageToConversation(data);
+      }
       sendMessage(data, body);
     } catch (error) {
       console.error(error);
@@ -80,41 +84,61 @@ const Home = ({ user, logout }) => {
   };
 
   const setToSeen = async (conversationId, userId) => {
-    if(!conversationId){
+    if (!conversationId) {
       return;
     }
-  await axios.put("/api/conversations", {conversationId, userId})
-  sendReadReceipt({conversationId, userId})
-  }
+    await axios.put('/api/conversations', { conversationId, userId });
+    sendReadReceipt({ conversationId, userId });
+  };
+
+  const addNewConvo = useCallback(
+    (recipientId, message) => {
+      let newConversation = conversations.map((conversation) => {
+        if (conversation.otherUser.id === recipientId) {
+          conversation = {
+            ...conversation,
+            id: message.conversationId,
+            messages: [message],
+            latestMessageText: message.text,
+          };
+        }
+        return conversation;
+      });
+      setConversations(newConversation);
+    },
+    [setConversations, conversations]
+  );
 
   const addMessageToConversation = useCallback(
     (data, recipientId = null) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
-      const { message, sender = null} = data;
-
+      const { message, sender = null } = data;
       if (sender !== null) {
-       let newConversation = conversations.map((conversation)=>{
-          if(conversation.otherUser.id === recipientId){ 
-            conversation = {...conversation,
+        let newConversation = conversations.map((conversation) => {
+          if (conversation.otherUser.id === recipientId) {
+            conversation = {
+              ...conversation,
               id: message.conversationId,
               messages: [message],
-              latestMessageText: message.text}
+              latestMessageText: message.text,
+            };
           }
-          return conversation
-        })
+          return conversation;
+        });
         setConversations(newConversation);
-      } else {
-        setConversations(prev => prev.map((convo) => {
+      }
+      setConversations((prev) =>
+        prev.map((convo) => {
           if (convo.id === message.conversationId) {
-            const convoCopy = { ...convo }
+            const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
             return convoCopy;
           } else {
             return convo;
           }
-      }))
-      }
+        })
+      );
     },
     [setConversations, conversations]
   );
