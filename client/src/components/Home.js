@@ -62,16 +62,14 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  const postMessage = (body) => {
+  const postMessage = async (body) => {
     try {
-      const data = saveMessage(body);
-
+      const data = await saveMessage(body);
       if (!body.conversationId) {
         addNewConvo(body.recipientId, data.message);
       } else {
         addMessageToConversation(data);
       }
-
       sendMessage(data, body);
     } catch (error) {
       console.error(error);
@@ -80,39 +78,52 @@ const Home = ({ user, logout }) => {
 
   const addNewConvo = useCallback(
     (recipientId, message) => {
-      conversations.forEach((convo) => {
-        if (convo.otherUser.id === recipientId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-          convo.id = message.conversationId;
+      let newConversation = conversations.map((conversation) => {
+        if (conversation.otherUser.id === recipientId) {
+          conversation = {
+            ...conversation,
+            id: message.conversationId,
+            messages: [message],
+            latestMessageText: message.text,
+          };
         }
+        return conversation;
       });
-      setConversations(conversations);
+      setConversations(newConversation);
     },
     [setConversations, conversations]
   );
 
   const addMessageToConversation = useCallback(
-    (data) => {
+    (data, recipientId = null) => {
       // if sender isn't null, that means the message needs to be put in a brand new convo
       const { message, sender = null } = data;
       if (sender !== null) {
-        const newConvo = {
-          id: message.conversationId,
-          otherUser: sender,
-          messages: [message],
-        };
-        newConvo.latestMessageText = message.text;
-        setConversations((prev) => [newConvo, ...prev]);
+        let newConversation = conversations.map((conversation) => {
+          if (conversation.otherUser.id === recipientId) {
+            conversation = {
+              ...conversation,
+              id: message.conversationId,
+              messages: [message],
+              latestMessageText: message.text,
+            };
+          }
+          return conversation;
+        });
+        setConversations(newConversation);
       }
-
-      conversations.forEach((convo) => {
-        if (convo.id === message.conversationId) {
-          convo.messages.push(message);
-          convo.latestMessageText = message.text;
-        }
-      });
-      setConversations(conversations);
+      setConversations((prev) =>
+        prev.map((convo) => {
+          if (convo.id === message.conversationId) {
+            const convoCopy = { ...convo };
+            convoCopy.messages = [...convoCopy.messages, message];
+            convoCopy.latestMessageText = message.text;
+            return convoCopy;
+          } else {
+            return convo;
+          }
+        })
+      );
     },
     [setConversations, conversations]
   );
