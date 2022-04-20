@@ -83,7 +83,6 @@ router.get("/", async (req, res, next) => {
 
       conversations[i] = convoJSON;
     }
-
     res.json(conversations);
   } catch (error) {
     next(error);
@@ -103,7 +102,10 @@ router.put("/", async (req, res, next) => {
         },
       }
     );
-    res.status(200);
+    const conversation = await Conversation.findByPk(req.body.conversationId, {
+      include: Message,
+    });
+    res.json(conversation);
   } catch (error) {
     next(error);
   }

@@ -8,7 +8,7 @@ const Message = db.define("message", {
   },
   seen: {
     type: Sequelize.BOOLEAN,
-    defaultVal: false,
+    defaultValue: false,
   },
   senderId: {
     type: Sequelize.INTEGER,
