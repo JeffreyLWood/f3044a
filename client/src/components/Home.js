@@ -129,23 +129,33 @@ const Home = ({ user, logout }) => {
   );
 
   const sendReadReceipt = (body) => {
+    setToSeen(body.conversationId, body.userId);
     socket.emit('send-read-receipt', {
-      conversationId: body.recipientId,
+      conversationId: body.conversationId,
       userId: body.userId,
     });
   };
 
-  const setToSeen = async (conversationId, userId) => {
+  const setToSeen = useCallback(async (conversationId, userId) => {
     if (!conversationId) {
       return;
     }
-    try {
-      await axios.put('/api/conversations', { conversationId, userId });
-      sendReadReceipt({ conversationId, userId });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    let { data } = await axios.put('/api/conversations', {
+      conversationId,
+      userId,
+    });
+    setConversations((prev) =>
+      prev.map((convo) => {
+        if (convo.id === conversationId) {
+          const convoCopy = { ...convo };
+          convoCopy.messages = data;
+          return convoCopy;
+        } else {
+          return convo;
+        }
+      })
+    );
+  }, []);
 
   const setActiveChat = (username) => {
     setActiveConversation(username);
@@ -186,16 +196,22 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-    socket.on('send-read-receipt', sendReadReceipt);
+    socket.on('send-read-receipt', setToSeen);
     return () => {
       // before the component is destroyed
       // unbind all event handlers used in this component
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
-      socket.off('send-read-receipt', sendReadReceipt);
+      socket.off('send-read-receipt', setToSeen);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [
+    addMessageToConversation,
+    addOnlineUser,
+    removeOfflineUser,
+    setToSeen,
+    socket,
+  ]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -243,7 +259,7 @@ const Home = ({ user, logout }) => {
           setActiveChat={setActiveChat}
         />
         <ActiveChat
-          setToSeen={setToSeen}
+          sendReadReceipt={sendReadReceipt}
           activeConversation={activeConversation}
           conversations={conversations}
           user={user}

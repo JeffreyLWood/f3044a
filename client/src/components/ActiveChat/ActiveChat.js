@@ -24,7 +24,7 @@ const ActiveChat = ({
   conversations,
   activeConversation,
   postMessage,
-  setToSeen
+  sendReadReceipt,
 }) => {
   const classes = useStyles();
 
@@ -33,8 +33,6 @@ const ActiveChat = ({
         (conversation) => conversation.otherUser.username === activeConversation
       )
     : {};
-
-conversation && setToSeen(conversation.id, user.id)
 
   const isConversation = (obj) => {
     return obj !== {} && obj !== undefined;
@@ -52,7 +50,8 @@ conversation && setToSeen(conversation.id, user.id)
             {user && (
               <>
                 <Messages
-               
+                  conversation={conversation}
+                  sendReadReceipt={sendReadReceipt}
                   messages={conversation.messages}
                   otherUser={conversation.otherUser}
                   userId={user.id}
