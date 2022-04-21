@@ -102,10 +102,11 @@ router.put("/", async (req, res, next) => {
         },
       }
     );
-    const conversation = await Conversation.findByPk(req.body.conversationId, {
-      include: Message,
+    const messages = await Message.findAll({
+      where: { conversationId: req.body.conversationId },
+      order: [["createdAt", "ASC"]],
     });
-    res.json(conversation);
+    res.json(messages, 2, 0);
   } catch (error) {
     next(error);
   }
