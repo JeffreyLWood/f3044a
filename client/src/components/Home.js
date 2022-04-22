@@ -152,17 +152,30 @@ const Home = ({ user, logout }) => {
         userId,
       });
 
-      let seenConversation = conversations.map((convo) => {
-        if (convo.id === conversationId) {
-          const convoCopy = { ...convo };
-          convoCopy.messages = data;
-          convoCopy.latestMessageText = data[data.length - 1].text;
-          return convoCopy;
-        } else {
-          return convo;
-        }
-      });
-      setConversations(seenConversation);
+      setConversations((prev) =>
+        prev.map((convo) => {
+          if (convo.id === conversationId) {
+            const convoCopy = { ...convo };
+            convoCopy.messages = data;
+            return convoCopy;
+          } else {
+            return convo;
+          }
+        })
+      );
+
+      // let updatedConversation = conversations.map((convo) => {
+      //   if (convo.id === conversationId) {
+      //     const convoCopy = { ...convo };
+      //     convoCopy.messages = data;
+      //     convoCopy.latestMessageText = data[data.length - 1].text;
+      //     return convoCopy;
+      //   } else {
+      //     return convo;
+      //   }
+      // });
+      // console.log(conversations, updatedConversation);
+      // setConversations(updatedConversation);
     },
     [setConversations, conversations]
   );

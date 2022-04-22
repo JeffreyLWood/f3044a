@@ -18,10 +18,15 @@ const Messages = (props) => {
   });
 
   useEffect(() => {
-    sendReadReceipt({
-      conversationId: messages[0]?.conversationId,
-      userId: userId,
-    });
+    let lastMessage = messages[messages.length - 1];
+    if (!lastMessage?.seen) {
+      setTimeout(() => {
+        sendReadReceipt({
+          conversationId: messages[0]?.conversationId,
+          userId: userId,
+        });
+      }, 1000);
+    }
   });
 
   return (
