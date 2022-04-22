@@ -22,7 +22,7 @@ const Messages = (props) => {
       conversationId: messages[0]?.conversationId,
       userId: userId,
     });
-  }, [otherUser, messages.length, mostRecentSeenId]);
+  });
 
   return (
     <Box>

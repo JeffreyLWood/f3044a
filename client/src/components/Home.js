@@ -131,7 +131,7 @@ const Home = ({ user, logout }) => {
         })
       );
     },
-    [setConversations, conversations]
+    [setConversations, conversations, activeConversation]
   );
 
   const sendReadReceipt = (body) => {
@@ -147,24 +147,24 @@ const Home = ({ user, logout }) => {
       if (!conversationId) {
         return;
       }
-      let { data } = await axios.put('/api/conversations', {
+      const { data } = await axios.put('/api/conversations', {
         conversationId,
         userId,
       });
 
-      setConversations((prev) =>
-        prev.map((convo) => {
-          if (convo.id === conversationId) {
-            const convoCopy = { ...convo };
-            convoCopy.messages = data;
-            return convoCopy;
-          } else {
-            return convo;
-          }
-        })
-      );
+      let seenConversation = conversations.map((convo) => {
+        if (convo.id === conversationId) {
+          const convoCopy = { ...convo };
+          convoCopy.messages = data;
+          convoCopy.latestMessageText = data[data.length - 1].text;
+          return convoCopy;
+        } else {
+          return convo;
+        }
+      });
+      setConversations(seenConversation);
     },
-    [conversations, setConversations]
+    [setConversations, conversations]
   );
 
   const setActiveChat = (username) => {
