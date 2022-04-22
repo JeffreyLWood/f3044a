@@ -3,7 +3,7 @@ import { Box } from '@material-ui/core';
 import { BadgeAvatar, ChatContent } from '../Sidebar';
 import { makeStyles } from '@material-ui/core/styles';
 import { useState } from 'react';
-
+import { useEffect } from 'react';
 const useStyles = makeStyles((theme) => ({
   root: {
     borderRadius: 8,
@@ -18,14 +18,29 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Chat = ({ conversation, setActiveChat }) => {
+const Chat = ({ conversation, setActiveChat, setConversations }) => {
   const classes = useStyles();
   const { otherUser } = conversation;
-  let [unreadCount, setUnreadCount] = useState(conversation.unreadCount);
+  let [unreadCount, setUnreadCount] = useState(null);
+
+  useEffect(() => {
+    setUnreadCount(conversation.unreadCount);
+  }, [conversation.unreadCount]);
 
   const handleClick = async (conversation) => {
     await setActiveChat(conversation.otherUser.username);
-    setUnreadCount(0);
+
+    setConversations((prev) =>
+      prev.map((convo) => {
+        if (convo.id === conversation.id) {
+          const convoCopy = { ...convo };
+          convoCopy.unreadCount = 0;
+          return convoCopy;
+        } else {
+          return convo;
+        }
+      })
+    );
   };
 
   return (
@@ -36,7 +51,11 @@ const Chat = ({ conversation, setActiveChat }) => {
         online={otherUser.online}
         sidebar={true}
       />
-      <ChatContent conversation={conversation} unreadCount={unreadCount} />
+      <ChatContent
+        conversation={conversation}
+        unreadCount={unreadCount}
+        setUnreadCount={setUnreadCount}
+      />
     </Box>
   );
 };

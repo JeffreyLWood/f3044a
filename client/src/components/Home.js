@@ -118,6 +118,12 @@ const Home = ({ user, logout }) => {
             const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
+            if (
+              !message.seen &&
+              convoCopy.otherUser.username !== activeConversation
+            ) {
+              convoCopy.unreadCount += 1;
+            }
             return convoCopy;
           } else {
             return convo;
@@ -136,26 +142,30 @@ const Home = ({ user, logout }) => {
     });
   };
 
-  const setToSeen = useCallback(async (conversationId, userId) => {
-    if (!conversationId) {
-      return;
-    }
-    let { data } = await axios.put('/api/conversations', {
-      conversationId,
-      userId,
-    });
-    setConversations((prev) =>
-      prev.map((convo) => {
-        if (convo.id === conversationId) {
-          const convoCopy = { ...convo };
-          convoCopy.messages = data;
-          return convoCopy;
-        } else {
-          return convo;
-        }
-      })
-    );
-  }, []);
+  const setToSeen = useCallback(
+    async (conversationId, userId) => {
+      if (!conversationId) {
+        return;
+      }
+      let { data } = await axios.put('/api/conversations', {
+        conversationId,
+        userId,
+      });
+
+      setConversations((prev) =>
+        prev.map((convo) => {
+          if (convo.id === conversationId) {
+            const convoCopy = { ...convo };
+            convoCopy.messages = data;
+            return convoCopy;
+          } else {
+            return convo;
+          }
+        })
+      );
+    },
+    [conversations, setConversations]
+  );
 
   const setActiveChat = (username) => {
     setActiveConversation(username);
@@ -253,6 +263,7 @@ const Home = ({ user, logout }) => {
         <CssBaseline />
         <SidebarContainer
           conversations={conversations}
+          setConversations={setConversations}
           user={user}
           clearSearchedUsers={clearSearchedUsers}
           addSearchedUsers={addSearchedUsers}

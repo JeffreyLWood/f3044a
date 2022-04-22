@@ -10,16 +10,19 @@ const Messages = (props) => {
 
   useEffect(() => {
     messages.forEach((message) => {
-      if (message.seen && message.senderId === userId) {
+      if (message.seen) {
         setMostRecentSeenId(message.id);
         return;
       }
     });
+  });
+
+  useEffect(() => {
     sendReadReceipt({
-      conversationId: messages[0].conversationId,
+      conversationId: messages[0]?.conversationId,
       userId: userId,
     });
-  });
+  }, [otherUser, messages.length, mostRecentSeenId]);
 
   return (
     <Box>
