@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Box, Typography } from '@material-ui/core';
-import { Avatar } from "@material-ui/core";
+import { Avatar } from '@material-ui/core';
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -34,7 +34,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const SenderBubble = ({ time, text, mostRecentSeenId, id, otherUser}) => {
+const SenderBubble = ({ time, text, mostRecentSeenId, id, otherUser }) => {
   const classes = useStyles();
 
   return (
@@ -43,7 +43,13 @@ const SenderBubble = ({ time, text, mostRecentSeenId, id, otherUser}) => {
       <Box className={classes.bubble}>
         <Typography className={classes.text}>{text}</Typography>
       </Box>
-      {mostRecentSeenId === id  ? <Avatar alt={otherUser.username} src={otherUser.photoUrl} className={classes.profilePic} /> : null}
+      {mostRecentSeenId === id ? (
+        <Avatar
+          alt={otherUser.username}
+          src={otherUser.photoUrl}
+          className={classes.profilePic}
+        />
+      ) : null}
     </Box>
   );
 };
