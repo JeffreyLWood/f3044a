@@ -10,7 +10,7 @@ const Messages = (props) => {
 
   useEffect(() => {
     messages.forEach((message) => {
-      if (message.seen) {
+      if (message.seen && message.senderId === userId) {
         setMostRecentSeenId(message.id);
         return;
       }
