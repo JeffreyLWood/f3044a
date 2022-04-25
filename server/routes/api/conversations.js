@@ -81,6 +81,14 @@ router.get("/", async (req, res, next) => {
         return accum;
       }, 0);
 
+      convoJSON.mostRecentSeenId = null;
+
+      convoJSON.messages.forEach((message) => {
+        if (message.seen && message.senderId === userId) {
+          convoJSON.mostRecentSeenId = message.id;
+          return;
+        }
+      });
       conversations[i] = convoJSON;
     }
     res.json(conversations);
