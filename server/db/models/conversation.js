@@ -12,15 +12,14 @@ Conversation.findConversation = async function (userIds) {
   });
 
   let table = {};
-  let numberOfUsers = userIds.length;
 
   const findConversation = (userIds) => {
     for (let i = 0; i < conversations.length; i++) {
       if (userIds[userIds.length - 1] === conversations[i].userId) {
-        table[conversations.id] = conversations[i].userId;
-      }
-      if (table[conversations[i].id].length === numberOfUsers) {
-        return table[conversations.id];
+        table[conversations.id] = conversations[i];
+        if (userIds.length === 1) {
+          return table[conversations.id];
+        }
       } else {
         userIds.splice(userIds.length - 1, 1);
         findConversation(userIds);
