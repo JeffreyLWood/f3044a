@@ -1,36 +1,30 @@
 const { Op } = require("sequelize");
 const db = require("../db");
 const Message = require("./message");
+const User = require("./user");
 
 const Conversation = db.define("conversation", {});
 
 // find conversation given two user Ids
 
 Conversation.findConversation = async function (userIds) {
-  const conversations = await User.findOne({
-    where: { id: [userIds], include: Conversation },
-  });
-
+  let conversations = [];
   let table = {};
-
-  const findConversation = (userIds) => {
-    for (let i = 0; i < conversations.length; i++) {
-      if (userIds[userIds.length - 1] === conversations[i].userId) {
-        table[conversations.id] = conversations[i];
-        if (userIds.length === 1) {
-          return table[conversations.id];
-        }
-      } else {
-        userIds.splice(userIds.length - 1, 1);
-        findConversation(userIds);
-      }
+  //Put all conversations by each user in userIds in an array
+  userIds.map(async (id) => {
+    table[id] = true;
+    let data = await User.findByPk(id, { include: Conversation });
+    conversations.push(data.conversations);
+  });
+  //Loop through conversations, if conversations[i].userId is not one of the userIds, remove it from the array
+  for (let i = 0; i < conversations.length; i++) {
+    if (!conversations[i].userId.in(table)) {
+      conversations.splice(i, 1);
     }
-  };
+  }
 
-  // return conversation or null if it doesn't exist
-  return conversation;
+  // return conversation or null
+  return conversations[0] || null;
 };
 
 module.exports = Conversation;
-
-// [username: 'jeff', conversations: [{id:1, userId:1}, {id:1, userId: 5}, {id:1, userId: 6}, {id:2, userId: 1}]
