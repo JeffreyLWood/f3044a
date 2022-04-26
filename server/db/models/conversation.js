@@ -5,11 +5,11 @@ const User = require("./user");
 
 const Conversation = db.define("conversation", {});
 
-// find conversation given two user Ids
+// find conversation given multiple user Ids
 
 Conversation.findConversation = async function (userIds) {
   let table = {};
-
+  //Make a table where keys are conversation ids and values are user objects
   await Promise.all(
     userIds.map(async (id) => {
       let user = await User.findByPk(id);
@@ -27,7 +27,7 @@ Conversation.findConversation = async function (userIds) {
     })
   );
   let conversation = null;
-
+  //If a value in table has all of the users in the userIds array then we have a conversation, else return null
   for (let key in table) {
     if (table[key].length === userIds.length) {
       conversation = await Conversation.findByPk(key);
@@ -37,21 +37,3 @@ Conversation.findConversation = async function (userIds) {
 };
 
 module.exports = Conversation;
-
-// let conversations = [];
-// let table = {};
-// //Put all conversations by each user in userIds in an array
-// userIds.map(async (id) => {
-//   table[id] = true;
-//   let data = await User.findByPk(id, { include: Conversation });
-//   conversations.push(data.conversations);
-// });
-// //Loop through conversations, if conversations[i].userId is not one of the userIds, remove it from the array
-// for (let i = 0; i < conversations.length; i++) {
-//   if (!conversations[i].userId.in(table)) {
-//     conversations.splice(i, 1);
-//   }
-// }
-
-// // return conversation or null
-// return conversations[0] || null;
