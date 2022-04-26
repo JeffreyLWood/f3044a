@@ -11,79 +11,78 @@ router.get("/", async (req, res, next) => {
       return res.sendStatus(401);
     }
     const userId = req.user.id;
-    const conversations = await Conversation.findAll({
+    const user = await User.findOne({
       where: {
-        [Op.or]: {
-          user1Id: userId,
-          user2Id: userId,
-        },
+        id: userId,
       },
-      attributes: ["id"],
-      order: [[Message, "createdAt", "DESC"]],
-      include: [
-        {
-          model: Message,
-        },
-        {
-          model: User,
-          as: "user1",
-          where: {
-            id: {
-              [Op.not]: userId,
-            },
-          },
-          attributes: ["id", "username", "photoUrl"],
-          required: false,
-        },
-        {
-          model: User,
-          as: "user2",
-          where: {
-            id: {
-              [Op.not]: userId,
-            },
-          },
-          attributes: ["id", "username", "photoUrl"],
-          required: false,
-        },
-      ],
+      // attributes: ["id"],
+      // order: [[Message, "createdAt", "DESC"]],
+      // include: [
+      //   {
+      //     model: Conversation,
+      //   },
+      // {
+      //   model: User,
+      //   as: "user1",
+      //   where: {
+      //     id: {
+      //       [Op.not]: userId,
+      //     },
+      //   },
+      //   attributes: ["id", "username", "photoUrl"],
+      //   required: false,
+      // },
+      // {
+      //   model: User,
+      //   as: "user2",
+      //   where: {
+      //     id: {
+      //       [Op.not]: userId,
+      //     },
+      //   },
+      //   attributes: ["id", "username", "photoUrl"],
+      //   required: false,
+      // },
+      // ],
     });
+    // let convos = await user.getConversations();
+    console.log(await Conversation.findConversation([1, 2, 3]));
+    // for (let i = 0; i < conversations.length; i++) {
+    //   const convo = conversations[i];
+    //   convo.messages.sort((a, b) => a.createdAt - b.createdAt);
+    //   const convoJSON = convo.toJSON();
 
-    for (let i = 0; i < conversations.length; i++) {
-      const convo = conversations[i];
-      convo.messages.sort((a, b) => a.createdAt - b.createdAt);
-      const convoJSON = convo.toJSON();
+    //   // set a property "otherUser" so that frontend will have easier access
+    //   if (convoJSON.user1) {
+    //     convoJSON.otherUser = convoJSON.user1;
+    //     delete convoJSON.user1;
+    //   } else if (convoJSON.user2) {
+    //     convoJSON.otherUser = convoJSON.user2;
+    //     delete convoJSON.user2;
+    //   }
 
-      // set a property "otherUser" so that frontend will have easier access
-      if (convoJSON.user1) {
-        convoJSON.otherUser = convoJSON.user1;
-        delete convoJSON.user1;
-      } else if (convoJSON.user2) {
-        convoJSON.otherUser = convoJSON.user2;
-        delete convoJSON.user2;
-      }
+    //   // set property for online status of the other user
+    //   if (onlineUsers.includes(convoJSON.otherUser.id)) {
+    //     convoJSON.otherUser.online = true;
+    //   } else {
+    //     convoJSON.otherUser.online = false;
+    //   }
 
-      // set property for online status of the other user
-      if (onlineUsers.includes(convoJSON.otherUser.id)) {
-        convoJSON.otherUser.online = true;
-      } else {
-        convoJSON.otherUser.online = false;
-      }
+    //   // set properties for notification count and latest message preview
+    //   convoJSON.latestMessageText =
+    //     convoJSON.messages[convoJSON.messages.length - 1].text;
 
-      // set properties for notification count and latest message preview
-      convoJSON.latestMessageText =
-        convoJSON.messages[convoJSON.messages.length - 1].text;
+    //   convoJSON.unreadCount = convoJSON.messages.reduce((accum, cur) => {
+    //     if (!cur.seen && cur.senderId !== userId) {
+    //       accum += 1;
+    //     }
+    //     return accum;
+    //   }, 0);
 
-      convoJSON.unreadCount = convoJSON.messages.reduce((accum, cur) => {
-        if (!cur.seen && cur.senderId !== userId) {
-          accum += 1;
-        }
-        return accum;
-      }, 0);
-
-      conversations[i] = convoJSON;
-    }
-    res.json(conversations);
+    //   conversations[i] = convoJSON;
+    // }
+    // console.log("ROUTE", JSON.stringify(convos, 2, 0));
+    // res.json(convos);
   } catch (error) {
     next(error);
   }

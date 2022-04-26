@@ -8,9 +8,32 @@ const Conversation = db.define("conversation", {});
 // find conversation given two user Ids
 
 Conversation.findConversation = async function (userIds) {
-  let conversations = await User.findByPk(id, { include: Conversation });
-  console.log(conversations);
-  return conversations[0];
+  let table = {};
+
+  await Promise.all(
+    userIds.map(async (id) => {
+      let user = await User.findByPk(id);
+      if (!user) {
+        return null;
+      }
+      let convos = await user.getConversations();
+      convos.forEach((convo) => {
+        if (table[convo.id]) {
+          table[convo.id] = [...table[convo.id], user];
+        } else {
+          table[convo.id] = [user];
+        }
+      });
+    })
+  );
+  let conversation = null;
+
+  for (let key in table) {
+    if (table[key].length === userIds.length) {
+      conversation = await Conversation.findByPk(key);
+    }
+  }
+  return conversation;
 };
 
 module.exports = Conversation;
