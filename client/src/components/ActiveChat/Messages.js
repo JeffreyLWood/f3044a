@@ -4,28 +4,18 @@ import { SenderBubble, OtherUserBubble } from '.';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 const Messages = (props) => {
-  const { messages, otherUser, userId, sendReadReceipt } = props;
+  const { messages, otherUser, userId, sendReadReceipt, conversation } = props;
 
   let [mostRecentSeenId, setMostRecentSeenId] = useState(null);
 
   useEffect(() => {
-    messages.forEach((message) => {
-      if (message.seen && message.senderId === userId) {
-        setMostRecentSeenId(message.id);
-        return;
-      }
-    });
-  });
-
-  useEffect(() => {
+    setMostRecentSeenId(conversation.mostRecentSeenId);
     let lastMessage = messages[messages.length - 1];
     if (!lastMessage?.seen) {
-      setTimeout(() => {
-        sendReadReceipt({
-          conversationId: messages[0]?.conversationId,
-          userId: userId,
-        });
-      }, 1000);
+      sendReadReceipt({
+        conversationId: messages[0]?.conversationId,
+        userId: userId,
+      });
     }
   });
 

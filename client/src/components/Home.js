@@ -157,6 +157,12 @@ const Home = ({ user, logout }) => {
           if (convo.id === conversationId) {
             const convoCopy = { ...convo };
             convoCopy.messages = data;
+            convoCopy.messages.forEach((message) => {
+              if (message.seen && message.senderId === userId) {
+                convoCopy.mostRecentSeenId = message.id;
+                return;
+              }
+            });
             return convoCopy;
           } else {
             return convo;
