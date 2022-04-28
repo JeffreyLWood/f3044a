@@ -99,6 +99,20 @@ router.get("/", async (req, res, next) => {
 
 router.put("/", async (req, res, next) => {
   try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    let conversation = await Conversation.findByPk(req.body.conversationId, {
+      include: Message,
+      order: [[Message, "createdAt", "ASC"]],
+    });
+
+    if (
+      req.body.userId !== conversation.user1Id &&
+      req.body.userId !== conversation.user2Id
+    ) {
+      return res.sendStatus(403);
+    }
     await Message.update(
       { seen: true },
       {
@@ -110,11 +124,7 @@ router.put("/", async (req, res, next) => {
         },
       }
     );
-    const messages = await Message.findAll({
-      where: { conversationId: req.body.conversationId },
-      order: [["createdAt", "ASC"]],
-    });
-    res.json(messages, 2, 0);
+    res.json(conversation.messages);
   } catch (error) {
     next(error);
   }
