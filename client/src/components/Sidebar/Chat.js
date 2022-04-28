@@ -2,6 +2,7 @@ import React from 'react';
 import { Box } from '@material-ui/core';
 import { BadgeAvatar, ChatContent } from '../Sidebar';
 import { makeStyles } from '@material-ui/core/styles';
+import { useState, useEffect } from 'react';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,12 +18,29 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Chat = ({ conversation, setActiveChat }) => {
+const Chat = ({ conversation, setActiveChat, setConversations }) => {
   const classes = useStyles();
   const { otherUser } = conversation;
+  let [unreadCount, setUnreadCount] = useState(null);
+
+  useEffect(() => {
+    setUnreadCount(conversation.unreadCount);
+  }, [conversation.unreadCount]);
 
   const handleClick = async (conversation) => {
     await setActiveChat(conversation.otherUser.username);
+
+    setConversations((prev) =>
+      prev.map((convo) => {
+        if (convo.id === conversation.id) {
+          const convoCopy = { ...convo };
+          convoCopy.unreadCount = 0;
+          return convoCopy;
+        } else {
+          return convo;
+        }
+      })
+    );
   };
 
   return (
@@ -33,7 +51,11 @@ const Chat = ({ conversation, setActiveChat }) => {
         online={otherUser.online}
         sidebar={true}
       />
-      <ChatContent conversation={conversation} />
+      <ChatContent
+        conversation={conversation}
+        unreadCount={unreadCount}
+        setUnreadCount={setUnreadCount}
+      />
     </Box>
   );
 };

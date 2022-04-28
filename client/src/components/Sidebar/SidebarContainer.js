@@ -4,6 +4,7 @@ import axios from 'axios';
 
 const SidebarContainer = ({
   conversations,
+  setConversations,
   user,
   clearSearchedUsers,
   addSearchedUsers,
@@ -43,6 +44,7 @@ const SidebarContainer = ({
       conversations={conversations}
       user={user}
       setActiveChat={setActiveChat}
+      setConversations={setConversations}
     />
   );
 };

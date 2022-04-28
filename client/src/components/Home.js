@@ -118,6 +118,12 @@ const Home = ({ user, logout }) => {
             const convoCopy = { ...convo };
             convoCopy.messages = [...convoCopy.messages, message];
             convoCopy.latestMessageText = message.text;
+            if (
+              !message.seen &&
+              convoCopy.otherUser.username !== activeConversation
+            ) {
+              convoCopy.unreadCount += 1;
+            }
             return convoCopy;
           } else {
             return convo;
@@ -125,7 +131,46 @@ const Home = ({ user, logout }) => {
         })
       );
     },
-    [setConversations, conversations]
+    [setConversations, conversations, activeConversation]
+  );
+
+  const sendReadReceipt = (body) => {
+    setToSeen(body.conversationId, body.userId);
+    socket.emit('send-read-receipt', {
+      conversationId: body.conversationId,
+      userId: body.userId,
+    });
+  };
+
+  const setToSeen = useCallback(
+    async (conversationId, userId) => {
+      if (!conversationId) {
+        return;
+      }
+      const { data } = await axios.put('/api/conversations', {
+        conversationId,
+        userId,
+      });
+
+      setConversations((prev) =>
+        prev.map((convo) => {
+          if (convo.id === conversationId) {
+            const convoCopy = { ...convo };
+            convoCopy.messages = data;
+            convoCopy.messages.forEach((message) => {
+              if (message.seen && message.senderId === userId) {
+                convoCopy.mostRecentSeenId = message.id;
+                return;
+              }
+            });
+            return convoCopy;
+          } else {
+            return convo;
+          }
+        })
+      );
+    },
+    [setConversations]
   );
 
   const setActiveChat = (username) => {
@@ -167,15 +212,22 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-
+    socket.on('send-read-receipt', setToSeen);
     return () => {
       // before the component is destroyed
       // unbind all event handlers used in this component
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('send-read-receipt', setToSeen);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [
+    addMessageToConversation,
+    addOnlineUser,
+    removeOfflineUser,
+    setToSeen,
+    socket,
+  ]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -217,12 +269,14 @@ const Home = ({ user, logout }) => {
         <CssBaseline />
         <SidebarContainer
           conversations={conversations}
+          setConversations={setConversations}
           user={user}
           clearSearchedUsers={clearSearchedUsers}
           addSearchedUsers={addSearchedUsers}
           setActiveChat={setActiveChat}
         />
         <ActiveChat
+          sendReadReceipt={sendReadReceipt}
           activeConversation={activeConversation}
           conversations={conversations}
           user={user}

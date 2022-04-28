@@ -1,26 +1,32 @@
-import React from "react";
-import { Box, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import React from 'react';
+import { Box, Typography, Badge } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    display: "flex",
-    justifyContent: "space-between",
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginLeft: 20,
     flexGrow: 1,
   },
   username: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
     letterSpacing: -0.2,
   },
   previewText: {
     fontSize: 12,
-    color: "#9CADC8",
+    color: '#9CADC8',
+    letterSpacing: -0.17,
+  },
+  unreadPreviewText: {
+    fontSize: 12,
+    fontWeight: 'bold',
     letterSpacing: -0.17,
   },
 }));
 
-const ChatContent = ({ conversation }) => {
+const ChatContent = ({ conversation, unreadCount }) => {
   const classes = useStyles();
 
   const { otherUser } = conversation;
@@ -32,10 +38,15 @@ const ChatContent = ({ conversation }) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={classes.previewText}>
+        <Typography
+          className={
+            unreadCount >= 1 ? classes.unreadPreviewText : classes.previewText
+          }
+        >
           {latestMessageText}
         </Typography>
       </Box>
+      <Badge badgeContent={unreadCount} color="primary"></Badge>
     </Box>
   );
 };
