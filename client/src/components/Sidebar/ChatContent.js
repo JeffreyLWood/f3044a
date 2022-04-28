@@ -24,13 +24,6 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 'bold',
     letterSpacing: -0.17,
   },
-  bubble: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    backgroundColor: '#3A8DFF',
-    borderRadius: 20,
-    padding: 10,
-  },
 }));
 
 const ChatContent = ({ conversation, unreadCount }) => {
@@ -53,9 +46,7 @@ const ChatContent = ({ conversation, unreadCount }) => {
           {latestMessageText}
         </Typography>
       </Box>
-      {unreadCount >= 1 ? (
-        <Badge className={classes.bubble}>{unreadCount}</Badge>
-      ) : null}
+      <Badge badgeContent={unreadCount} color="primary"></Badge>
     </Box>
   );
 };
